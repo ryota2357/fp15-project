@@ -1,7 +1,7 @@
 .DEFAULT_GOAL = build
 
-CFILES := $(wildcard src/*.c) $(wildcard src/movie/*/*.c)
-HFILES := $(wildcard src/*.h) $(wildcard src/movie/*/*.h)
+CFILES := $(wildcard src/*.c) $(wildcard src/*/src/*.c)
+HFILES := $(wildcard src/*.h) $(wildcard src/*/include/*.h)
 
 # ffmpeg:
 #   - first `-r 30` means the span of ppm file (fps)

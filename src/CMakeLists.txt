@@ -13,8 +13,9 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 endif()
 
 add_subdirectory(./movie)
+add_subdirectory(./badapple)
 add_executable(main main.c)
 
-target_link_libraries(main movie)
+target_link_libraries(main movie badapple)
 target_compile_options(main PRIVATE -O2 -Wall -Wextra -Wpedantic)
 target_compile_features(main PRIVATE c_std_17)
