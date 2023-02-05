@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../include/free.h"
+
 static bool IsInit = false;
 static BadAppleFrame Frames[BADAPPLE_FRAME_COUNT] = {0};
 
@@ -25,10 +27,11 @@ static char* substring(const char* target, size_t begin, size_t length, char* re
 }
 
 static FILE* get_frame_file(void) {
-    char dir[250] = "";
+    // search dir
     const char* this_file = __FILE__;
     const int len = strlen(this_file);
     const char* dir_end = strrchr(this_file, '/');
+    char* dir = calloc(strlen(this_file), sizeof(char));
     for (int i = 0; i < len; i++) {
         dir[i] = this_file[i];
         if (this_file + i == dir_end) {
@@ -36,15 +39,23 @@ static FILE* get_frame_file(void) {
         }
     }
 
-    char file_name[250];
-    char s[250] = "";  // hoge/fuga/badapple/src/ -> hoge/fuga/badapple/resources/frames2.txt
-    sprintf(file_name, "%s/resources/frames2.txt", substring(dir, 0, strlen(dir) - 5, s, sizeof(s)));
+    // get file_name
+    const size_t dir_length = strlen(dir);
+    char* file_name = calloc(dir_length + 50, sizeof(char));
+    char* substr = calloc(dir_length, sizeof(char));  // hoge/fuga/badapple/src/ -> hoge/fuga/badapple/resources/frames2.txt
+    sprintf(file_name, "%s/resources/frames2.txt", substring(dir, 0, dir_length - 5, substr, dir_length));
+    FREE(substr);
+    FREE(dir);
 
+    // open file
     FILE* file = fopen(file_name, "r");
     if (!file) {
         fprintf(stderr, "Could not open frames data file: %s\n", file_name);
+        FREE(file_name);
         exit(1);
     }
+    FREE(file_name);
+
     return file;
 }
 
