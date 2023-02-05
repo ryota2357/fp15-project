@@ -1,5 +1,6 @@
 #include "../include/bitset128.h"
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 

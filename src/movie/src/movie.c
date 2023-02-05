@@ -1,5 +1,11 @@
 #include "../include/movie.h"
+
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#include "../include/free.h"
 
 static void ensure_not_freed(const Movie* const movie) {
     if (movie->renderers == NULL) {

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "common.h"
+#include <stddef.h>
+#include <stdint.h>
 #include "renderer.h"
 
 typedef struct {

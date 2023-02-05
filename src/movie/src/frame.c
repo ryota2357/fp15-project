@@ -1,5 +1,11 @@
 #include "../include/frame.h"
 
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "../include/free.h"
+
 static void ensure_not_freed(const Frame* const frame) {
     if (frame->pixels == NULL) {
         fprintf(stderr, "Frame is freed");

@@ -1,7 +1,7 @@
 #pragma once
 
+#include <stdint.h>
 #include "color.h"
-#include "common.h"
 
 typedef struct {
     const uint16_t width;
