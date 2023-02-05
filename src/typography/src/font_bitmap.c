@@ -139,6 +139,6 @@ CharBitMap font_bitmap_get(const Char32 ch) {
     if (HasBitMap[id]) {
         return BitMaps[id];
     }
-    fprintf(stderr, "Not found bitmap, you must register it to charset.txt: %s", ch.chars);
+    fprintf(stderr, "Not found bitmap, you must register it to charset.txt: `%s`\n", ch.chars);
     exit(1);
 }

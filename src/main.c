@@ -45,24 +45,24 @@ void draw_char_at(const Frame* const frame, const Char32 ch, const uint8_t rate,
     }
 }
 
-// 5 4 3 2 1 0 1 2 3 4 5
-// 流れてく　時の中ででも
-void lyrics1_renderer(const Frame* const frame, const uint32_t time) {
-    static const Char32 words[10] = {
-        {.chars = "流"}, {.chars = "れ"}, {.chars = "て"}, {.chars = "く"},
-        {.chars = "時"}, {.chars = "の"}, {.chars = "中"}, {.chars = "で"}, {.chars = "で"}, {.chars = "も"},
-    };
-    const uint16_t width = frame->width;
-    const uint16_t y = (BADAPPLE_FRAME_HEIGHT * 4) - 30;
-    for (int i = 5; i >= 2; --i) {
-        uint16_t x = (width / 2) - (20 * i);
-        draw_char_at(frame, words[5 - i], 2, x, y);
+#define LYRICS_RENDERER(number, size, words, duration)                               \
+    void lyrics_renderer##number(const Frame* const frame, const uint32_t time) {    \
+        if (time > duration) return;                                                 \
+        const uint64_t width = frame->width;                                         \
+        for (int i = -((size) / 2); i < ((size) + 1) / 2; ++i) {                     \
+            int idx = i + (size) / 2;                                                \
+            if (words[idx].code == 0) continue;                                      \
+            uint16_t x = (width / 2) + (20 * i);                                     \
+            draw_char_at(frame, words[idx], 2, x, (BADAPPLE_FRAME_HEIGHT * 4) - 30); \
+        }                                                                            \
     }
-    for (int i = 0; i <= 5; ++i) {
-        uint16_t x = (width / 2) + (20 * i);
-        draw_char_at(frame, words[4 + i], 2, x, y);
-    }
-}
+
+
+const Char32 lyrics01[11] = { {.chars = "流"}, {.chars = "れ"}, {.chars = "て"}, {.chars = "く"}, {.code = 0}, {.chars = "時"}, {.chars = "の"}, {.chars = "中"}, {.chars = "で"}, {.chars = "で"}, {.chars = "も"}, };
+LYRICS_RENDERER(01, 11, lyrics01, 100)
+
+const Char32 lyrics02[14] = { {.chars = "気"}, {.chars = "だ"}, {.chars = "る"}, {.chars = "さ"}, {.chars = "が"}, {.chars = "ほ"}, {.chars = "ら"}, {.chars = "ぐ"}, {.chars = "ル"}, {.chars = "グ"}, {.chars = "ル"}, {.chars = "廻"}, {.chars = "っ"}, {.chars = "て"}, };
+LYRICS_RENDERER(02, 14, lyrics02, 100)
 
 int main(int argc, char* args[]) {
     if (argc != 2) {
@@ -77,7 +77,8 @@ int main(int argc, char* args[]) {
     Movie movie = Movie_new(BADAPPLE_FRAME_WIDTH * 4, BADAPPLE_FRAME_HEIGHT * 4, 1000);
 
     Movie_add_renderer(&movie, badapple_renderer, 0);
-    Movie_add_renderer(&movie, lyrics1_renderer, 100);
+    Movie_add_renderer(&movie, lyrics_renderer01, 100);
+    Movie_add_renderer(&movie, lyrics_renderer02, 200);
 
     Movie_build(&movie, build_dir);
     Movie_free(&movie);
