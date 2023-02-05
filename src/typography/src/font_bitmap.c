@@ -128,6 +128,7 @@ void font_bitmap_init(void) {
         HasBitMap[id] = true;
     }
 
+    fclose(chardata_file);
     IsInit = true;
 }
 

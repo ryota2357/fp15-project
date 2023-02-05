@@ -32,7 +32,7 @@ void Movie_add_renderer(Movie* self, Renderer renderer, const uint32_t delay) {
     const size_t count = self->renderer_count;
     if (count >= self->__capacity) {
         self->__capacity <<= 1;
-        const int cap = self->__capacity;
+        const size_t cap = self->__capacity;
         self->renderers = realloc(self->renderers, sizeof(Renderer) * cap);
         self->renderer_delay = realloc(self->renderer_delay, sizeof(uint32_t) * cap);
     }
@@ -56,6 +56,7 @@ void Movie_build(const Movie* const self, const char* build_dir) {
         sprintf(name, "%s/%05d.ppm", build_dir, time);
         Frame_write_file(&frame, name);
         Frame_free(&frame);
+        free(name);
     }
 }
 
