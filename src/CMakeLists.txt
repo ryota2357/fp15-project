@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.24)
 
 project(fp_movie
   DESCRIPTION "Fundamental Programming 15 (comprehensive practice)"
