@@ -6,7 +6,7 @@
 #include <string.h>
 
 static bool IsInit = false;
-static BadAppleFrame Frames[BADAPPLE_FRAME_COUNT];
+static BadAppleFrame Frames[BADAPPLE_FRAME_COUNT] = {0};
 
 // https://programming-place.net/ppp/contents/c/rev_res/string017.html
 static char* substring(const char* target, size_t begin, size_t length, char* result, size_t result_size) {
@@ -37,7 +37,6 @@ static FILE* get_frame_file(void) {
     char file_name[250];
     char s[250] = "";  // hoge/fuga/badapple/src/ -> hoge/fuga/badapple/resources/frames2.txt
     sprintf(file_name, "%s/resources/frames2.txt", substring(dir, 0, strlen(dir) - 5, s, sizeof(s)));
-    /* sprintf(file_name, "%s/resources/test.txt", substring(dir, 0, strlen(dir) - 5, s, sizeof(s))); */
 
     FILE* file = fopen(file_name, "r");
     if (!file) {

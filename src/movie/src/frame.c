@@ -8,7 +8,11 @@ static void ensure_not_freed(const Frame* const frame) {
 }
 
 static uint32_t calc_pos(const Frame* const frame, const uint16_t x, const uint16_t y) {
-    return ((uint32_t)y) * frame->width + x;
+    if (x < frame->width && y < frame->height) {
+        return ((uint32_t)y) * frame->width + x;
+    }
+    fprintf(stderr, "Index out of range: (%d, %d), max is (%d, %d)", x, y, frame->width, frame->height);
+    exit(1);
 }
 
 Frame Frame_new(const uint16_t width, const uint16_t height) {
@@ -22,6 +26,10 @@ Frame Frame_new(const uint16_t width, const uint16_t height) {
         .height = height,
         .pixels = p
     };
+}
+
+Color Frame_at(const Frame* const self, const uint16_t x, const uint16_t y) {
+    return self->pixels[calc_pos(self, x, y)];
 }
 
 void Frame_draw(const Frame* const self, const uint16_t x, const uint16_t y, const Color color) {
