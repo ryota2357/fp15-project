@@ -1,0 +1,9 @@
+version: "3"
+services:
+    fp15:
+        build: .
+        volumes:
+            - .:/project
+        tty: true
+        working_dir: /project
+        command: bash
