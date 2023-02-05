@@ -52,11 +52,11 @@ void Movie_build(const Movie* const self, const char* build_dir) {
             if (delay > time) continue;
             self->renderers[i](&frame, time - delay);
         }
-        char* name = malloc(sizeof(char) * strlen(build_dir) + 10);  // 10 is "/00000.ppm" length
+        char* name = calloc(strlen(build_dir) + 10, sizeof(char));  // 10 is "/00000.ppm" length
         sprintf(name, "%s/%05d.ppm", build_dir, time);
         Frame_write_file(&frame, name);
         Frame_free(&frame);
-        free(name);
+        FREE(name);
     }
 }
 

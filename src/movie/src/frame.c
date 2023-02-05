@@ -23,7 +23,7 @@ static uint32_t calc_pos(const Frame* const frame, const uint16_t x, const uint1
 
 Frame Frame_new(const uint16_t width, const uint16_t height) {
     const uint32_t size = ((int32_t)(width)) * height;
-    Color* p = malloc(sizeof(Color) * size);
+    Color* p = calloc(size, sizeof(Color));
     for (uint32_t i = 0; i < size; ++i) {
         p[i] = color_new(255, 255, 255);
     }
