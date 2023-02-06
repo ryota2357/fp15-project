@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "badapple.h"
 #include "bitset128.h"
@@ -87,20 +88,39 @@ int main(int argc, char* args[]) {
     return 0;
 }
 
-// 適当なアルゴで解像度上げた方がいい。(https://qiita.com/yoya/items/f167b2598fec98679422)
+// reference: https://qiita.com/yoya/items/f167b2598fec98679422
 void badapple_renderer(const Frame* const frame, const uint32_t time) {
     BadAppleFrame apple = badapple_get(time);
-    for (uint16_t x = 0; x < BADAPPLE_FRAME_WIDTH; ++x) {
-        for (uint16_t y = 0; y < BADAPPLE_FRAME_HEIGHT; ++y) {
-            if (BitSet128_is_1(&apple.lines[y], x)) {
-                continue;
+    uint16_t scale_width = 4;
+    uint16_t scale_height = 4;
+
+    int dx[4] = {0, 1, 0, 1};
+    int dy[4] = {0, 0, 1, 1};
+    for (uint16_t x = 0; x < scale_width * BADAPPLE_FRAME_WIDTH; ++x) {
+        for (uint16_t y = 0; y < scale_height * BADAPPLE_FRAME_HEIGHT; ++y) {
+            uint16_t base_x = x / scale_width;
+            uint16_t base_y = y / scale_height;
+            double sum_color = 0;
+            double sum_weight = 0;
+            for (int dir = 0; dir < 4; ++dir) {
+                uint16_t original_x = base_x + dx[dir];
+                uint16_t original_y = base_y + dy[dir];
+                if (original_x == BADAPPLE_FRAME_WIDTH) {
+                    continue;
+                }
+                if (original_y == BADAPPLE_FRAME_HEIGHT) {
+                    continue;
+                }
+                double dist = pow(x - original_x * scale_width, 2) + pow(y - original_y * scale_height, 2) + 1;
+                double weight = 1.0 / dist;
+                sum_weight += weight;
+                if (BitSet128_is_1(&apple.lines[original_y], original_x)) {
+                    sum_color += 255.0 * weight;
+                }
             }
-            for (int i = 0; i < 4; ++i) {
-                Frame_draw(frame, 4 * x + i, 4 * y + 0, color_new(0, 0, 0));
-                Frame_draw(frame, 4 * x + i, 4 * y + 1, color_new(0, 0, 0));
-                Frame_draw(frame, 4 * x + i, 4 * y + 2, color_new(0, 0, 0));
-                Frame_draw(frame, 4 * x + i, 4 * y + 3, color_new(0, 0, 0));
-            }
+            sum_color /= sum_weight;
+            uint8_t color = sum_color + 0.5;
+            Frame_draw(frame, x, y, color_new(color, color, color));
         }
     }
 }
