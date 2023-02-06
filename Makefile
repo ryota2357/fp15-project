@@ -16,10 +16,10 @@ build: src/build/main
 	@src/build/main "$(shell pwd)/build"
 
 	@echo "Converting GIF..."
-	@ffmpeg -loglevel error -r 30 -i build/%05d.ppm -r 30 build/animation.gif
+	@ffmpeg -loglevel error -r 30 -i build/%04d.ppm -r 30 build/animation.gif
 
 	@echo "Converting MP4..."
-	@ffmpeg -loglevel error -r 30 -i build/%05d.ppm -pix_fmt yuv420p -r 30 build/animation.mp4
+	@ffmpeg -loglevel error -r 30 -i build/%04d.ppm -pix_fmt yuv420p -r 30 build/animation.mp4
 .PHONY: build
 
 src/build/main: src/build $(CFILES) $(HFILES)

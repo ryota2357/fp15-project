@@ -10,19 +10,6 @@
 #include "movie.h"
 
 #define LYRICS_RENDERER_PROTOTYPE_DEFINITION(number) void lyrics_renderer##number(const Frame* const frame, const uint32_t time);
-#define LYRICS_RENDERER(number, words, duration)                                     \
-    void lyrics_renderer##number(const Frame* const frame, const uint32_t time) {    \
-        if (time > duration) return;                                                 \
-        const uint16_t size = sizeof(words) / sizeof(words[0]);                      \
-        const uint16_t width = frame->width;                                         \
-        for (int i = -(size / 2); i < (size + 1) / 2; ++i) {                         \
-            int idx = i + (size / 2);                                                \
-            if (words[idx].code == 0) continue;                                      \
-            uint16_t x = (width / 2) + (20 * i);                                     \
-            draw_char_at(frame, words[idx], 2, x, (BADAPPLE_FRAME_HEIGHT * 4) - 30); \
-        }                                                                            \
-    }
-
 LYRICS_RENDERER_PROTOTYPE_DEFINITION(01) LYRICS_RENDERER_PROTOTYPE_DEFINITION(02) LYRICS_RENDERER_PROTOTYPE_DEFINITION(03) LYRICS_RENDERER_PROTOTYPE_DEFINITION(04) LYRICS_RENDERER_PROTOTYPE_DEFINITION(05) LYRICS_RENDERER_PROTOTYPE_DEFINITION(06) LYRICS_RENDERER_PROTOTYPE_DEFINITION(07) LYRICS_RENDERER_PROTOTYPE_DEFINITION(08) LYRICS_RENDERER_PROTOTYPE_DEFINITION(09) LYRICS_RENDERER_PROTOTYPE_DEFINITION(10)
 LYRICS_RENDERER_PROTOTYPE_DEFINITION(11) LYRICS_RENDERER_PROTOTYPE_DEFINITION(12) LYRICS_RENDERER_PROTOTYPE_DEFINITION(13) LYRICS_RENDERER_PROTOTYPE_DEFINITION(14) LYRICS_RENDERER_PROTOTYPE_DEFINITION(15) LYRICS_RENDERER_PROTOTYPE_DEFINITION(16) LYRICS_RENDERER_PROTOTYPE_DEFINITION(17) LYRICS_RENDERER_PROTOTYPE_DEFINITION(18) LYRICS_RENDERER_PROTOTYPE_DEFINITION(19) LYRICS_RENDERER_PROTOTYPE_DEFINITION(20)
 LYRICS_RENDERER_PROTOTYPE_DEFINITION(21) LYRICS_RENDERER_PROTOTYPE_DEFINITION(22) LYRICS_RENDERER_PROTOTYPE_DEFINITION(23) LYRICS_RENDERER_PROTOTYPE_DEFINITION(24) LYRICS_RENDERER_PROTOTYPE_DEFINITION(25) LYRICS_RENDERER_PROTOTYPE_DEFINITION(26) LYRICS_RENDERER_PROTOTYPE_DEFINITION(27) LYRICS_RENDERER_PROTOTYPE_DEFINITION(28) LYRICS_RENDERER_PROTOTYPE_DEFINITION(29) LYRICS_RENDERER_PROTOTYPE_DEFINITION(30)
@@ -30,8 +17,6 @@ LYRICS_RENDERER_PROTOTYPE_DEFINITION(31) LYRICS_RENDERER_PROTOTYPE_DEFINITION(32
 LYRICS_RENDERER_PROTOTYPE_DEFINITION(41) LYRICS_RENDERER_PROTOTYPE_DEFINITION(42) LYRICS_RENDERER_PROTOTYPE_DEFINITION(43) LYRICS_RENDERER_PROTOTYPE_DEFINITION(44) LYRICS_RENDERER_PROTOTYPE_DEFINITION(45) LYRICS_RENDERER_PROTOTYPE_DEFINITION(46) LYRICS_RENDERER_PROTOTYPE_DEFINITION(47) LYRICS_RENDERER_PROTOTYPE_DEFINITION(48)
 
 void badapple_renderer(const Frame* const frame, const uint32_t time);
-
-void draw_char_at(const Frame* const frame, const Char32 ch, const uint8_t rate, const uint16_t posx, const uint16_t posy);
 
 int main(int argc, char* args[]) {
     if (argc != 2) {
@@ -43,7 +28,7 @@ int main(int argc, char* args[]) {
     font_bitmap_init();
     badapple_init();
 
-    Movie movie = Movie_new(BADAPPLE_FRAME_WIDTH * 4, BADAPPLE_FRAME_HEIGHT * 4, 5000);
+    Movie movie = Movie_new(BADAPPLE_FRAME_WIDTH * 4, BADAPPLE_FRAME_HEIGHT * 4, BADAPPLE_FRAME_COUNT);
 
     Movie_add_renderer(&movie, badapple_renderer, 0);
     Movie_add_renderer(&movie, lyrics_renderer01, 100);
@@ -95,7 +80,8 @@ int main(int argc, char* args[]) {
     Movie_add_renderer(&movie, lyrics_renderer47, 4700);
     Movie_add_renderer(&movie, lyrics_renderer48, 4800);
 
-    Movie_build(&movie, build_dir);
+    /* Movie_build(&movie, build_dir); */
+    Movie_debug_build(&movie, build_dir, 1000, 1500);
     Movie_free(&movie);
 
     return 0;
@@ -136,6 +122,19 @@ void draw_char_at(const Frame* const frame, const Char32 ch, const uint8_t rate,
         }
     }
 }
+
+#define LYRICS_RENDERER(number, words, duration)                                     \
+    void lyrics_renderer##number(const Frame* const frame, const uint32_t time) {    \
+        if (time > duration) return;                                                 \
+        const uint16_t size = sizeof(words) / sizeof(words[0]);                      \
+        const uint16_t width = frame->width;                                         \
+        for (int i = -(size / 2); i < (size + 1) / 2; ++i) {                         \
+            int idx = i + (size / 2);                                                \
+            if (words[idx].code == 0) continue;                                      \
+            uint16_t x = (width / 2) + (20 * i);                                     \
+            draw_char_at(frame, words[idx], 2, x, (BADAPPLE_FRAME_HEIGHT * 4) - 30); \
+        }                                                                            \
+    }
 
 const Char32 lyrics01[11] = { {.chars = "流"}, {.chars = "れ"}, {.chars = "て"}, {.chars = "く"}, {.code = 0}, {.chars = "時"}, {.chars = "の"}, {.chars = "中"}, {.chars = "で"}, {.chars = "で"}, {.chars = "も"}, };
 LYRICS_RENDERER(01, lyrics01, 100)
