@@ -20,8 +20,17 @@ For full develop, also Require:
 
 ## Build
 
+local:
+
 ```shell
 $ make
+```
+
+docker:
+
+```shell
+$ docker-compose up -d
+$ docker exec fp15 make
 ```
 
 ## Special Thanks
