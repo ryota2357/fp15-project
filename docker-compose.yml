@@ -4,6 +4,7 @@ services:
         build: .
         volumes:
             - .:/project
+        container_name: fp15
         tty: true
         working_dir: /project
         command: bash
