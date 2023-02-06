@@ -12,7 +12,7 @@ build: src/build/main
 	@mkdir -p build
 	@rm -f build/*.ppm build/animation.gif build/animation.mp4 build/palette.png
 
-	@echo "Generationg PPM files..."
+	@echo "Generating PPM files..."
 	@src/build/main "$(shell pwd)/build"
 
 	@echo "Converting MP4..."
