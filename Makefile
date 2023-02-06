@@ -10,16 +10,17 @@ HFILES := $(wildcard src/*.h) $(wildcard src/*/include/*.h)
 #   - How to create clear gif: use palette (ref. https://linuxfan.info/ffmpeg-gif-anime)
 build: src/build/main
 	@mkdir -p build
-	@rm -f build/*.ppm build/animation.gif build/animation.mp4
+	@rm -f build/*.ppm build/animation.gif build/animation.mp4 build/palette.png
 
 	@echo "Generationg PPM files..."
 	@src/build/main "$(shell pwd)/build"
 
-	@echo "Converting GIF..."
-	@ffmpeg -loglevel error -r 30 -i build/%04d.ppm -r 30 build/animation.gif
-
 	@echo "Converting MP4..."
 	@ffmpeg -loglevel error -r 30 -i build/%04d.ppm -pix_fmt yuv420p -r 30 build/animation.mp4
+
+	@echo "Converting GIF..."
+	@ffmpeg -loglevel error -i build/animation.mp4 -vf palettegen build/palette.png
+	@ffmpeg -loglevel error -r 30 -i build/%04d.ppm -i build/palette.png -filter_complex paletteuse -r 30 build/animation.gif
 .PHONY: build
 
 src/build/main: src/build $(CFILES) $(HFILES)
