@@ -88,8 +88,10 @@ void font_bitmap_init(void) {
     CharBitMap save_bitmap[300];  // now, 255 characters
     while (fgets(line, sizeof(line), chardata_file) != NULL) {
         if (line[0] == 'c') {
+            char byte_len[2];
+            substring(line, 2, 1, byte_len, sizeof(byte_len));
             Char32 current_char;
-            substring(line, 2, 3, current_char.chars, sizeof(current_char.chars));
+            substring(line, 3, atoi(byte_len), current_char.chars, sizeof(current_char.chars));
             save_bitmap[index].character = current_char;
             continue;
         }

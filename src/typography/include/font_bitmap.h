@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#define TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE (40)
+#define TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE (60)
 
 typedef union {
     char chars[4];

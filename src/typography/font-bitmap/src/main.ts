@@ -4,13 +4,14 @@ import * as fs from "fs";
 import { exit } from "process";
 
 function main() {
+  const bitmapPixelSize = 60;
   const charset = readCharset();
-  const data: { char: string; raw: string }[] = [];
+  const data: { char: string; raw: string, length: number }[] = [];
 
   for (const c of charset) {
-    const canvas = setupCanvas(40);
+    const canvas = setupCanvas(bitmapPixelSize);
     const ctx = canvas.getContext("2d");
-    ctx.fillText(c, 20, 20);
+    ctx.fillText(c, bitmapPixelSize / 2, bitmapPixelSize / 2);
 
     // debug: dump jpeg
     // writeFileSafe(`build/${c}.jpeg`, canvas.toBuffer("image/jpeg"));
@@ -20,26 +21,27 @@ function main() {
     for (let i = 0; i < buf.length; i += 4) {
       const [b, g, r] = buf.subarray(i, i + 3);
       const average = (r + g + b) / 3;
-      const v = average > 100 ? "1" : "0"; // 100 is determined by looking at the jpeg.
+      const v = average > 140 ? "1" : "0"; // 140 is determined by debug check.
       raw += v;
     }
     data.push({
       char: c,
       raw: raw,
+      length: Buffer.byteLength(c)
     });
   }
 
   // debug: data check
   // for (const d of data) {
-  //   for (let i = 0; i < 40; i++) {
-  //     console.log(d.raw.slice(40 * i, 40 * (i + 1)));
+  //   for (let i = 0; i < bitmapPixelSize; i++) {
+  //     console.log(d.raw.slice(bitmapPixelSize * i, bitmapPixelSize * (i + 1)));
   //   }
   //   console.log();
   // }
 
   writeFileSafe(
     "resources/chardata.txt",
-    data.map((x) => `c:${x.char}\nb:${x.raw}`).join("\n")
+    data.map((x) => `c:${x.length}${x.char}\nb:${x.raw}`).join("\n")
   );
 }
 

@@ -181,8 +181,8 @@ void badapple_renderer(const Frame* const frame, const uint32_t time) {
 
 void draw_char_at(const Frame* const frame, const Char32 ch, const uint8_t rate, const uint16_t posx, const uint16_t posy) {
     CharBitMap map = font_bitmap_get(ch);
-    for (uint16_t y = 0; y < (40 / rate); ++y) {
-        for (uint16_t x = 0; x < (40 / rate); ++x) {
+    for (uint16_t y = 0; y < (TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE / rate); ++y) {
+        for (uint16_t x = 0; x < (TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE / rate); ++x) {
             uint16_t v = 0;
             for (int i = 0; i < rate; ++i) for (int j = 0; j < rate; ++j) {
                 v += (map.bitmap[rate * y + i] & (1ll << (rate * x + j)) ? 1 : 0);
@@ -206,7 +206,7 @@ void draw_char_at(const Frame* const frame, const Char32 ch, const uint8_t rate,
             int idx = i + (size / 2);                                                \
             if (words[idx].code == 0) continue;                                      \
             uint16_t x = (width / 2) + (20 * i);                                     \
-            draw_char_at(frame, words[idx], 2, x, (BADAPPLE_FRAME_HEIGHT * 4) - 30); \
+            draw_char_at(frame, words[idx], 3, x, (BADAPPLE_FRAME_HEIGHT * 4) - 30); \
         }                                                                            \
     }
 
