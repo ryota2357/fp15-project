@@ -43,7 +43,7 @@ static FILE* get_frame_file(void) {
     const size_t dir_length = strlen(dir);
     char* file_name = calloc(dir_length + 50, sizeof(char));
     char* substr = calloc(dir_length, sizeof(char));  // hoge/fuga/badapple/src/ -> hoge/fuga/badapple/resources/frames2.txt
-    sprintf(file_name, "%s/resources/frames2.txt", substring(dir, 0, dir_length - 5, substr, dir_length));
+    sprintf(file_name, "%s/resources/frames.txt", substring(dir, 0, dir_length - 5, substr, dir_length));
     FREE(substr);
     FREE(dir);
 
