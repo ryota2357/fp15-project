@@ -145,25 +145,28 @@ void badapple_renderer(const Frame* const frame, const uint32_t time) {
     uint16_t scale_width = 4;
     uint16_t scale_height = 4;
 
-    int dx[4] = {0, 1, 0, 1};
-    int dy[4] = {0, 0, 1, 1};
+    int dx[9] = {-1, -1, -1, 0, 0, 0, 1, 1, 1};
+    int dy[9] = {-1, 0, 1, -1, 0, 1, -1, 0, 1};
     for (uint16_t x = 0; x < scale_width * BADAPPLE_FRAME_WIDTH; ++x) {
         for (uint16_t y = 0; y < scale_height * BADAPPLE_FRAME_HEIGHT; ++y) {
             uint16_t base_x = x / scale_width;
             uint16_t base_y = y / scale_height;
             double sum_color = 0;
             double sum_weight = 0;
-            for (int dir = 0; dir < 4; ++dir) {
+            for (int dir = 0; dir < 9; ++dir) {
                 uint16_t original_x = base_x + dx[dir];
                 uint16_t original_y = base_y + dy[dir];
-                if (original_x == BADAPPLE_FRAME_WIDTH) {
+                if (BADAPPLE_FRAME_WIDTH <= original_x) {
                     continue;
                 }
-                if (original_y == BADAPPLE_FRAME_HEIGHT) {
+                if (BADAPPLE_FRAME_HEIGHT <= original_y) {
                     continue;
                 }
-                double dist = pow(x - original_x * scale_width, 2) + pow(y - original_y * scale_height, 2) + 1;
+                double dist = pow(x - original_x * scale_width, 2) + pow(y - original_y * scale_height, 2) + 1.0;
                 double weight = 1.0 / dist;
+                if (scale_width * scale_width + scale_height * scale_height < dist) {
+                   continue;
+                }
                 sum_weight += weight;
                 if (BitSet128_is_1(&apple.lines[original_y], original_x)) {
                     sum_color += 255.0 * weight;
