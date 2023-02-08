@@ -68,7 +68,8 @@ static int compare_uint32_t(const void* a, const void* b) {
     uint32_t nb = *(uint32_t*)b;
     return na == nb ? 0 : (na > nb ? 1 : -1);  // because uint32_t, cannot do subtraction.
 }
-size_t array_unuque(uint32_t* array, size_t size) {
+
+size_t array_unique(uint32_t* array, size_t size) {
     size_t end = 0;
     for (size_t i = 1; i < size; ++i) {
         if (array[i] != array[end]) {
@@ -121,7 +122,7 @@ void font_bitmap_init(void) {
             bases[j] = save_bitmap[j].character.code % BasePrimary;
         }
         qsort(bases, size, sizeof(uint32_t), compare_uint32_t);
-        const size_t count = array_unuque(bases, size);
+        const size_t count = array_unique(bases, size);
         free(bases);
         if (count == size) {
             break;
