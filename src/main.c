@@ -142,11 +142,11 @@ int main(int argc, char* args[]) {
 // reference: https://qiita.com/yoya/items/f167b2598fec98679422
 void badapple_renderer(const Frame* const frame, const uint32_t time) {
     BadAppleFrame apple = badapple_get(time);
-    uint16_t scale_width = 4;
-    uint16_t scale_height = 4;
+    const uint16_t scale_width = 4;
+    const uint16_t scale_height = 4;
 
-    int dx[9] = {-1, -1, -1, 0, 0, 0, 1, 1, 1};
-    int dy[9] = {-1, 0, 1, -1, 0, 1, -1, 0, 1};
+    const int dx[9] = {-1, -1, -1, 0, 0, 0, 1, 1, 1};
+    const int dy[9] = {-1, 0, 1, -1, 0, 1, -1, 0, 1};
     for (uint16_t x = 0; x < scale_width * BADAPPLE_FRAME_WIDTH; ++x) {
         for (uint16_t y = 0; y < scale_height * BADAPPLE_FRAME_HEIGHT; ++y) {
             uint16_t base_x = x / scale_width;
@@ -179,20 +179,30 @@ void badapple_renderer(const Frame* const frame, const uint32_t time) {
     }
 }
 
-void draw_char_at(const Frame* const frame, const Char32 ch, const uint8_t rate, const uint16_t posx, const uint16_t posy) {
+void draw_char_at(const Frame* const frame, const Char32 ch, const uint16_t posx, const uint16_t posy) {
+    const uint16_t reduction_width = 3;
+    const uint16_t reduction_height = 3;
+    const double mid_x = (double) reduction_width / 2;
+    const double mid_y = (double) reduction_height / 2;
+
     CharBitMap map = font_bitmap_get(ch);
-    for (uint16_t y = 0; y < (TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE / rate); ++y) {
-        for (uint16_t x = 0; x < (TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE / rate); ++x) {
-            uint16_t v = 0;
-            for (int i = 0; i < rate; ++i) for (int j = 0; j < rate; ++j) {
-                v += (map.bitmap[rate * y + i] & (1ll << (rate * x + j)) ? 1 : 0);
+    for (uint16_t y = 0; y < (TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE / reduction_height); ++y) {
+        for (uint16_t x = 0; x < (TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE / reduction_width); ++x) {
+            double sum_color = 0;
+            double sum_weight = 0;
+            for (int i = 0; i < reduction_width; ++i) for (int j = 0; j < reduction_height; ++j) {
+                double dist = pow(i - mid_x, 2) + pow(y - mid_y, 2) + 1.0;
+                double weight = 1.0 / dist;
+                uint16_t flag = (map.bitmap[reduction_width * y + i] & (1ll << (reduction_height * x + j)) ? 1 : 0);
+                sum_weight += weight;
+                sum_color += (double) flag * weight;
             }
-            if (v <= (rate * rate / 2)) {
+            if (sum_color < sum_weight * 0.5) {
                 continue;
             }
             Color frame_color = Frame_at(frame, posx + x, posy + y);
-            uint32_t ave = ((uint32_t)frame_color.r + frame_color.g + frame_color.b) / 3;
-            Frame_draw(frame, posx + x, posy + y, ave > 100 ? color_new(0, 0, 0) : color_new(255, 255, 255));
+            uint32_t ave = ((uint32_t) frame_color.r + frame_color.g + frame_color.b) / 3;
+            Frame_draw(frame, posx + x, posy + y, color_new(255 - ave, 255 - ave, 255 - ave));
         }
     }
 }
@@ -206,7 +216,7 @@ void draw_char_at(const Frame* const frame, const Char32 ch, const uint8_t rate,
             int idx = i + (size / 2);                                                \
             if (words[idx].code == 0) continue;                                      \
             uint16_t x = (width / 2) + (20 * i);                                     \
-            draw_char_at(frame, words[idx], 3, x, (BADAPPLE_FRAME_HEIGHT * 4) - 30); \
+            draw_char_at(frame, words[idx], x, (BADAPPLE_FRAME_HEIGHT * 4) - 30); \
         }                                                                            \
     }
 
