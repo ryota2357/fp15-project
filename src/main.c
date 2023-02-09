@@ -11,6 +11,8 @@
 #include "frame.h"
 #include "movie.h"
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
 #define LYRICS_RENDERER_PROTOTYPE_DEFINITION(number) void lyrics_renderer##number(const Frame* const frame, const uint32_t time);
 LYRICS_RENDERER_PROTOTYPE_DEFINITION(00) LYRICS_RENDERER_PROTOTYPE_DEFINITION(01) LYRICS_RENDERER_PROTOTYPE_DEFINITION(02) LYRICS_RENDERER_PROTOTYPE_DEFINITION(03) LYRICS_RENDERER_PROTOTYPE_DEFINITION(04) LYRICS_RENDERER_PROTOTYPE_DEFINITION(05) LYRICS_RENDERER_PROTOTYPE_DEFINITION(06) LYRICS_RENDERER_PROTOTYPE_DEFINITION(07) LYRICS_RENDERER_PROTOTYPE_DEFINITION(08) LYRICS_RENDERER_PROTOTYPE_DEFINITION(09)
 LYRICS_RENDERER_PROTOTYPE_DEFINITION(10) LYRICS_RENDERER_PROTOTYPE_DEFINITION(11) LYRICS_RENDERER_PROTOTYPE_DEFINITION(12) LYRICS_RENDERER_PROTOTYPE_DEFINITION(13) LYRICS_RENDERER_PROTOTYPE_DEFINITION(14) LYRICS_RENDERER_PROTOTYPE_DEFINITION(15) LYRICS_RENDERER_PROTOTYPE_DEFINITION(16) LYRICS_RENDERER_PROTOTYPE_DEFINITION(17) LYRICS_RENDERER_PROTOTYPE_DEFINITION(18) LYRICS_RENDERER_PROTOTYPE_DEFINITION(19)
@@ -203,7 +205,7 @@ void fadein_renderer(const Frame* const frame, const uint32_t time) {
     const uint16_t height = frame->height;
     for (uint16_t x = 0; x < width; ++x) {
         for (uint16_t y = 0; y < height; ++y) {
-            double level = fmin(255, speed * time);
+            double level = MIN(255, speed * time);
             Color color = Frame_at(frame, x, y);
             uint8_t r = color.r - level < 0 ? 0 : color.r - level;
             uint8_t g = color.g - level < 0 ? 0 : color.g - level;
