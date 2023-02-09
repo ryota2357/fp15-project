@@ -2,6 +2,8 @@
 
 UEC Fundamental Programming last submission.
 
+![build/animation.gif](https://github.com/ryota2357/fp15-project/blob/build/animation.gif)
+
 ## Required
 
 - cmake (>= 3.24)
