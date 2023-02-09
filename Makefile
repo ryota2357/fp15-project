@@ -19,7 +19,7 @@ build: src/build/main
 	@ffmpeg -loglevel error -r 30 -i build/%04d.ppm -pix_fmt yuv420p -r 30 build/animation.mp4
 
 	@echo "Converting GIF..."
-	@ffmpeg -loglevel error -i build/animation.mp4 -vf palettegen build/palette.png
+	@ffmpeg -loglevel error -i build/%04d.ppm -vf palettegen build/palette.png
 	@ffmpeg -loglevel error -r 30 -i build/%04d.ppm -i build/palette.png -filter_complex paletteuse -r 30 build/animation.gif
 .PHONY: build
 

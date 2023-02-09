@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,6 +19,8 @@ LYRICS_RENDERER_PROTOTYPE_DEFINITION(30) LYRICS_RENDERER_PROTOTYPE_DEFINITION(31
 LYRICS_RENDERER_PROTOTYPE_DEFINITION(40) LYRICS_RENDERER_PROTOTYPE_DEFINITION(41) LYRICS_RENDERER_PROTOTYPE_DEFINITION(42) LYRICS_RENDERER_PROTOTYPE_DEFINITION(43) LYRICS_RENDERER_PROTOTYPE_DEFINITION(44) LYRICS_RENDERER_PROTOTYPE_DEFINITION(45) LYRICS_RENDERER_PROTOTYPE_DEFINITION(46) LYRICS_RENDERER_PROTOTYPE_DEFINITION(47)
 
 void badapple_renderer(const Frame* const frame, const uint32_t time);
+void fadein_renderer(const Frame* const frame, const uint32_t time);
+void credit_renderer(const Frame* const frame, const uint32_t time);
 
 const uint32_t lyrics_start[48] = {
     873,   // 00 流れてく　時の中ででも
@@ -75,12 +78,17 @@ int main(int argc, char* args[]) {
         fprintf(stderr, "Argument Error, the number of argument must be 2 but %d\n", argc);
         exit(1);
     }
-    char* build_dir = args[1];
+    const char* build_dir = args[1];
+    const bool short_movie = false;
 
     font_bitmap_init();
     badapple_init();
 
-    Movie movie = Movie_new(BADAPPLE_FRAME_WIDTH * 4, BADAPPLE_FRAME_HEIGHT * 4, BADAPPLE_FRAME_COUNT);
+    Movie movie = Movie_new(
+        BADAPPLE_FRAME_WIDTH * 4,
+        BADAPPLE_FRAME_HEIGHT * 4,
+        short_movie ? 2000 + 30 : BADAPPLE_FRAME_COUNT + 30
+    );
 
     Movie_add_renderer(&movie, badapple_renderer, 0);
     Movie_add_renderer(&movie, lyrics_renderer00, lyrics_start[0]);
@@ -132,6 +140,13 @@ int main(int argc, char* args[]) {
     Movie_add_renderer(&movie, lyrics_renderer46, lyrics_start[46]);
     Movie_add_renderer(&movie, lyrics_renderer47, lyrics_start[47]);
 
+    if (short_movie) {
+        Movie_add_renderer(&movie, fadein_renderer, 2000 - 60);
+        Movie_add_renderer(&movie, credit_renderer, 2000);
+    } else {
+        Movie_add_renderer(&movie, credit_renderer, BADAPPLE_FRAME_COUNT);
+    }
+
     Movie_build(&movie, build_dir);
     /* Movie_debug_build(&movie, build_dir, 1000, 1500); */
     Movie_free(&movie);
@@ -141,6 +156,9 @@ int main(int argc, char* args[]) {
 
 // reference: https://qiita.com/yoya/items/f167b2598fec98679422
 void badapple_renderer(const Frame* const frame, const uint32_t time) {
+    if (time >= BADAPPLE_FRAME_COUNT) {
+        return;
+    }
     BadAppleFrame apple = badapple_get(time);
     const uint16_t scale_width = 4;
     const uint16_t scale_height = 4;
@@ -179,9 +197,28 @@ void badapple_renderer(const Frame* const frame, const uint32_t time) {
     }
 }
 
-void draw_char_at(const Frame* const frame, const Char32 ch, const uint16_t posx, const uint16_t posy) {
-    const uint16_t reduction_width = 3;
-    const uint16_t reduction_height = 3;
+void fadein_renderer(const Frame* const frame, const uint32_t time) {
+    const double speed = 255.0 / 60;
+    const uint16_t width = frame->width;
+    const uint16_t height = frame->height;
+    for (uint16_t x = 0; x < width; ++x) {
+        for (uint16_t y = 0; y < height; ++y) {
+            double level = fmin(255, speed * time);
+            Color color = Frame_at(frame, x, y);
+            uint8_t r = color.r - level < 0 ? 0 : color.r - level;
+            uint8_t g = color.g - level < 0 ? 0 : color.g - level;
+            uint8_t b = color.b - level < 0 ? 0 : color.b - level;
+            Frame_draw(frame, x, y, color_new(r, g, b));
+        }
+    }
+}
+
+void draw_char_at(const Frame* const frame,
+                  const Char32 ch,
+                  const uint16_t reduction_width,
+                  const uint16_t reduction_height,
+                  const uint16_t posx,
+                  const uint16_t posy) {
     const double mid_x = (double) reduction_width / 2;
     const double mid_y = (double) reduction_height / 2;
 
@@ -206,18 +243,62 @@ void draw_char_at(const Frame* const frame, const Char32 ch, const uint16_t posx
         }
     }
 }
+void credit_renderer(const Frame* const frame, const uint32_t time) {
+    // fill background
+    const Color bg_color = color_new(15, 15, 25);
+    if (time < 15) {
+        double rate = time / 15.0;
+        for (uint16_t x = 0; x < frame->width; ++x) for (uint16_t y = 0; y < frame->height; ++y) {
+            uint8_t r = bg_color.r * rate;
+            uint8_t g = bg_color.g * rate;
+            uint8_t b = bg_color.b * rate;
+            Frame_draw(frame, x, y, color_new(r, g, b));
+        }
+        return;
+    }
+    for (uint16_t x = 0; x < frame->width; ++x) for (uint16_t y = 0; y < frame->height; ++y) {
+        Frame_draw(frame, x, y, bg_color);
+    }
 
-#define LYRICS_RENDERER(number, words, duration)                                     \
-    void lyrics_renderer##number(const Frame* const frame, const uint32_t time) {    \
-        if (time >= (duration)) return;                                              \
-        const uint16_t size = sizeof(words) / sizeof(words[0]);                      \
-        const uint16_t width = frame->width;                                         \
-        for (int i = -(size / 2); i < (size + 1) / 2; ++i) {                         \
-            int idx = i + (size / 2);                                                \
-            if (words[idx].code == 0) continue;                                      \
-            uint16_t x = (width / 2) + (20 * i);                                     \
-            draw_char_at(frame, words[idx], x, (BADAPPLE_FRAME_HEIGHT * 4) - 30); \
-        }                                                                            \
+    // 1: Bad Apple!!
+    // 2: Repository (GitHub):
+    // 3    ryota2357/fp15-project
+    // 4: Animation Frame Data (GitHub):
+    // 5    Reyansh-Khobragade/bad-apple-nodejs
+    // 6: Font: Noto Sans JP
+    // 7: Developer: ryota2357, dyktr_06
+    const Char32 line1[11] = { {.chars = "B"}, {.chars = "a"}, {.chars = "d"}, {.code = 0}, {.chars = "A"}, {.chars = "p"}, {.chars = "p"}, {.chars = "l"}, {.chars = "e"}, {.chars = "!"}, {.chars = "!"}, };
+    const Char32 line2[20] = { {.chars = "R"}, {.chars = "e"}, {.chars = "p"}, {.chars = "o"}, {.chars = "s"}, {.chars = "i"}, {.chars = "t"}, {.chars = "o"}, {.chars = "r"}, {.chars = "y"}, {.code = 0}, {.chars = "("}, {.chars = "G"}, {.chars = "i"}, {.chars = "t"}, {.chars = "H"}, {.chars = "u"}, {.chars = "b"}, {.chars = ")"}, {.chars = ":"}, };
+    const Char32 line3[24] = { {.code = 0}, {.code = 0}, {.chars = "r"}, {.chars = "y"}, {.chars = "o"}, {.chars = "t"}, {.chars = "a"}, {.chars = "2"}, {.chars = "3"}, {.chars = "5"}, {.chars = "7"}, {.chars = "/"}, {.chars = "f"}, {.chars = "p"}, {.chars = "1"}, {.chars = "5"}, {.chars = "-"}, {.chars = "p"}, {.chars = "r"}, {.chars = "o"}, {.chars = "j"}, {.chars = "e"}, {.chars = "c"}, {.chars = "t"}, };
+    const Char32 line4[30] = { {.chars = "A"}, {.chars = "n"}, {.chars = "i"}, {.chars = "m"}, {.chars = "a"}, {.chars = "t"}, {.chars = "i"}, {.chars = "o"}, {.chars = "n"}, {.code = 0}, {.chars = "F"}, {.chars = "r"}, {.chars = "a"}, {.chars = "m"}, {.chars = "e"}, {.code = 0}, {.chars = "D"}, {.chars = "a"}, {.chars = "t"}, {.chars = "a"}, {.code = 0}, {.chars = "("}, {.chars = "G"}, {.chars = "i"}, {.chars = "t"}, {.chars = "H"}, {.chars = "u"}, {.chars = "b"}, {.chars = ")"}, {.chars = ":"}, };
+    const Char32 line5[37] = { {.code = 0}, {.code = 0}, {.chars = "R"}, {.chars = "e"}, {.chars = "y"}, {.chars = "a"}, {.chars = "n"}, {.chars = "s"}, {.chars = "h"}, {.chars = "-"}, {.chars = "K"}, {.chars = "h"}, {.chars = "o"}, {.chars = "b"}, {.chars = "r"}, {.chars = "a"}, {.chars = "g"}, {.chars = "a"}, {.chars = "d"}, {.chars = "e"}, {.chars = "/"}, {.chars = "b"}, {.chars = "a"}, {.chars = "d"}, {.chars = "-"}, {.chars = "a"}, {.chars = "p"}, {.chars = "p"}, {.chars = "l"}, {.chars = "e"}, {.chars = "-"}, {.chars = "n"}, {.chars = "o"}, {.chars = "d"}, {.chars = "e"}, {.chars = "j"}, {.chars = "s"}, };
+    const Char32 line6[18] = { {.chars = "F"}, {.chars = "o"}, {.chars = "n"}, {.chars = "t"}, {.chars = ":"}, {.code = 0}, {.chars = "N"}, {.chars = "o"}, {.chars = "t"}, {.chars = "o"}, {.code = 0}, {.chars = "S"}, {.chars = "a"}, {.chars = "n"}, {.chars = "s"}, {.code = 0}, {.chars = "J"}, {.chars = "P"}, };
+    const Char32 line7[30] = { {.chars = "D"}, {.chars = "e"}, {.chars = "v"}, {.chars = "e"}, {.chars = "l"}, {.chars = "o"}, {.chars = "p"}, {.chars = "e"}, {.chars = "r"}, {.chars = ":"}, {.code = 0}, {.chars = "r"}, {.chars = "y"}, {.chars = "o"}, {.chars = "t"}, {.chars = "a"}, {.chars = "2"}, {.chars = "3"}, {.chars = "5"}, {.chars = "7"}, {.chars = ","}, {.code = 0}, {.chars = "d"}, {.chars = "y"}, {.chars = "k"}, {.chars = "t"}, {.chars = "r"}, {.chars = "_"}, {.chars = "0"}, {.chars = "6"}, };
+    #define _credit_renderer_CREDIT_LINE_DRAW(line, posy)               \
+        for (size_t i = 0;  i < (sizeof(line) / sizeof(Char32)); ++i) { \
+            if (line[i].code == 0) { continue; }                        \
+            draw_char_at(frame, line[i], 3, 3, 10 + (i * 9), (posy));   \
+        }
+    _credit_renderer_CREDIT_LINE_DRAW(line1, 30);
+    _credit_renderer_CREDIT_LINE_DRAW(line2, 55);
+    _credit_renderer_CREDIT_LINE_DRAW(line3, 80);
+    _credit_renderer_CREDIT_LINE_DRAW(line4, 105);
+    _credit_renderer_CREDIT_LINE_DRAW(line5, 130);
+    _credit_renderer_CREDIT_LINE_DRAW(line6, 155);
+    _credit_renderer_CREDIT_LINE_DRAW(line7, 180);
+}
+
+#define LYRICS_RENDERER(number, words, duration)                                        \
+    void lyrics_renderer##number(const Frame* const frame, const uint32_t time) {       \
+        if (time >= (duration)) return;                                                 \
+        const uint16_t size = sizeof(words) / sizeof(words[0]);                         \
+        const uint16_t width = frame->width;                                            \
+        for (int i = -(size / 2); i < (size + 1) / 2; ++i) {                            \
+            int idx = i + (size / 2);                                                   \
+            if (words[idx].code == 0) continue;                                         \
+            uint16_t x = (width / 2) + (20 * i);                                        \
+            draw_char_at(frame, words[idx], 2, 2, x, (BADAPPLE_FRAME_HEIGHT * 4) - 30); \
+        }                                                                               \
     }
 
 const Char32 lyrics00[11] = { {.chars = "流"}, {.chars = "れ"}, {.chars = "て"}, {.chars = "く"}, {.code = 0}, {.chars = "時"}, {.chars = "の"}, {.chars = "中"}, {.chars = "で"}, {.chars = "で"}, {.chars = "も"}, };

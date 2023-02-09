@@ -54,7 +54,8 @@ function setupCanvas(size: number): Canvas {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = "white";
-  ctx.font = `${size}px Noto Sans JP`;
+  ctx.antialias = "gray";
+  ctx.font = `${size * 0.7}px Noto Sans JP`;
   return canvas;
 }
 

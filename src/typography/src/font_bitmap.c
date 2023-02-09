@@ -86,12 +86,16 @@ void font_bitmap_init(void) {
     // read file
     char line[TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE * TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE + 10];
     size_t index = 0;
-    CharBitMap save_bitmap[300];  // now, 255 characters
+    CharBitMap save_bitmap[300];  // now, 289 characters
     while (fgets(line, sizeof(line), chardata_file) != NULL) {
+        if (index >= 300) {
+            fprintf(stderr, "Internal error: you must expand save_bitmap array size (fix %s:%d)", __FILE__, __LINE__ - 3);
+            exit(1);
+        }
         if (line[0] == 'c') {
             char byte_len[2];
             substring(line, 2, 1, byte_len, sizeof(byte_len));
-            Char32 current_char;
+            Char32 current_char = {0};
             substring(line, 3, atoi(byte_len), current_char.chars, sizeof(current_char.chars));
             save_bitmap[index].character = current_char;
             continue;
