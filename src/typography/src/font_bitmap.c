@@ -64,8 +64,8 @@ static FILE* get_chardata_file(void) {
 
 // https://programming-place.net/ppp/contents/c/rev_res/array010.html
 static int compare_uint32_t(const void* a, const void* b) {
-    uint32_t na = *(uint32_t*)a;
-    uint32_t nb = *(uint32_t*)b;
+    const uint32_t na = *(uint32_t*)a;
+    const uint32_t nb = *(uint32_t*)b;
     return na == nb ? 0 : (na > nb ? 1 : -1);  // because uint32_t, cannot do subtraction.
 }
 
@@ -84,16 +84,16 @@ void font_bitmap_init(void) {
     FILE* chardata_file = get_chardata_file();
 
     // read file
-    char line[TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE * TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE + 10];
+    char line[TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE * TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE + 10] = {0};
     size_t index = 0;
-    CharBitMap save_bitmap[300];  // now, 289 characters
+    CharBitMap save_bitmap[300] = {0};  // now, 289 characters
     while (fgets(line, sizeof(line), chardata_file) != NULL) {
         if (index >= 300) {
             fprintf(stderr, "Internal error: you must expand save_bitmap array size (fix %s:%d)", __FILE__, __LINE__ - 3);
             exit(1);
         }
         if (line[0] == 'c') {
-            char byte_len[2];
+            char byte_len[2] = {0};
             substring(line, 2, 1, byte_len, sizeof(byte_len));
             Char32 current_char = {0};
             substring(line, 3, atoi(byte_len), current_char.chars, sizeof(current_char.chars));
@@ -101,7 +101,7 @@ void font_bitmap_init(void) {
             continue;
         }
         if (line[0] == 'b') {
-            char bitmap[TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE * TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE + 1];
+            char bitmap[TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE * TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE + 1] = {0};
             substring(line, 2, TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE * TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE, bitmap, sizeof(bitmap));
             for (uint16_t i = 0; i < TYPOGRAPHY_FONT_BITMAP_PIXEL_SIZE; ++i) {
                 save_bitmap[index].bitmap[i] = 0;

@@ -62,7 +62,7 @@ static FILE* get_frame_file(void) {
 void badapple_init(void) {
     FILE* frame_file = get_frame_file();
 
-    char line[200];
+    char line[200] = {0};
     uint32_t index = 0, bit_line_index = 0;
     while (fgets(line, sizeof(line), frame_file) != NULL) {
         if (line[0] == 'c') {
@@ -76,7 +76,7 @@ void badapple_init(void) {
         if (line[0] == 't') {
             // 0123456789012345678901234567890
             // t:00:02:14,533 --> 00:02:14,567
-            char s[4];
+            char s[4] = {0};
             uint32_t time = 0;
             time += atoi(substring(line, 5, 2, s, sizeof(s))) * 60 * 1000;
             time += atoi(substring(line, 8, 2, s, sizeof(s))) * 1000;
@@ -94,8 +94,8 @@ void badapple_init(void) {
             // b:000,255,123,.....,000
             // length = 2 + (4 * 48(=BADAPPLE_FRAME_HEIGHT/2)) - 1 = 193
             for (uint8_t i = 0; i < BADAPPLE_FRAME_WIDTH / 2; ++i) {
-                char s[4];
-                uint8_t num = atoi(substring(line, (2 + i * 4), 3, s, sizeof(s)));
+                char s[4] = {0};
+                const uint8_t num = atoi(substring(line, (2 + i * 4), 3, s, sizeof(s)));
                 // ⓪ ④
                 // ① ⑤
                 // ② ⑥

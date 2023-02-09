@@ -17,7 +17,7 @@ static void ensure_not_freed(const Movie* const movie) {
 }
 
 Movie Movie_new(const uint16_t width, const uint16_t height, const uint32_t length) {
-    int c = 4;
+    const int c = 4;
     return (Movie){
         .height = height,
         .width = width,
