@@ -89,7 +89,7 @@ int main(int argc, char* args[]) {
     Movie movie = Movie_new(
         BADAPPLE_FRAME_WIDTH * 4,
         BADAPPLE_FRAME_HEIGHT * 4,
-        short_movie ? 1500 + 30 : BADAPPLE_FRAME_COUNT + 30
+        short_movie ? 1500 : BADAPPLE_FRAME_COUNT + 30
     );
 
     Movie_add_renderer(&movie, badapple_renderer, 0);
@@ -144,7 +144,6 @@ int main(int argc, char* args[]) {
 
     if (short_movie) {
         Movie_add_renderer(&movie, fadein_renderer, 1500 - 60);
-        Movie_add_renderer(&movie, credit_renderer, 1500);
     } else {
         Movie_add_renderer(&movie, credit_renderer, BADAPPLE_FRAME_COUNT);
     }
